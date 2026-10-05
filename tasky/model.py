@@ -101,6 +101,27 @@ class Task:
         due = self.due
         return due is not None and not self.completed and due < today
 
+    def to_dict(self) -> dict:
+        """A JSON-serializable view of the task.
+
+        Dates are rendered as ISO ``YYYY-MM-DD`` strings (or ``None``), and the
+        derived ``projects`` / ``contexts`` / ``tags`` / ``due`` fields are
+        included so consumers don't have to re-parse the description. ``raw`` is
+        the canonical stored line.
+        """
+        return {
+            "description": self.description,
+            "completed": self.completed,
+            "priority": self.priority,
+            "creation_date": self.creation_date.isoformat() if self.creation_date else None,
+            "completion_date": self.completion_date.isoformat() if self.completion_date else None,
+            "projects": self.projects,
+            "contexts": self.contexts,
+            "tags": self.tags,
+            "due": self.due.isoformat() if self.due else None,
+            "raw": self.format(),
+        }
+
     # -- (de)serialization --------------------------------------------------
 
     @classmethod

@@ -6,6 +6,7 @@ Run ``tasky --help`` or ``python -m tasky --help`` for usage.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 from datetime import date
@@ -126,6 +127,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_filter_args(sp)
     sp.add_argument("--sort", choices=SORT_KEYS, help="sort key")
     sp.add_argument("-r", "--reverse", action="store_true", help="reverse the order")
+    sp.add_argument("--json", action="store_true", help="output matching tasks as JSON")
     sp.set_defaults(func=cmd_list)
 
     # done / undone
@@ -247,6 +249,10 @@ def cmd_add(ctx: Context, args: argparse.Namespace) -> int:
 
 def cmd_list(ctx: Context, args: argparse.Namespace) -> int:
     rows = ctx.tasks.query(_query_from_args(args), sort=args.sort, reverse=args.reverse, today=ctx.today)
+    if getattr(args, "json", False):
+        payload = [{"number": nt.number, **nt.task.to_dict()} for nt in rows]
+        print(json.dumps(payload, indent=2))
+        return 0
     _print_list(rows, ctx.paint, ctx.today)
     if rows:
         print(ctx.paint(f"-- {len(rows)} task(s)", "dim"))

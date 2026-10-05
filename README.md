@@ -115,6 +115,7 @@ tasky add "Buy milk" +home @errands --due 2026-10-01 -P B
 tasky list                       # pending tasks (default)
 tasky list --all --sort due      # everything, earliest due first
 tasky list -p work --overdue     # overdue tasks in +work
+tasky list --json                # machine-readable JSON (respects all filters)
 tasky done 3                     # complete task #3
 tasky pri 2 A                    # set priority; `tasky pri 2 -` clears it
 tasky edit 2 "Buy oat milk +home"
