@@ -121,6 +121,7 @@ tasky edit 2 "Buy oat milk +home"
 tasky search milk                # full-text search across all tasks
 tasky projects                   # list every +project
 tasky stats                      # summary report
+tasky report                     # per-project breakdown (pending/done/overdue)
 tasky archive                    # move completed tasks to the done file
 ```
 
