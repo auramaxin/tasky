@@ -216,6 +216,42 @@ class TaskList:
             "completion_rate": (len(done) / total) if total else 0.0,
         }
 
+    NO_PROJECT = "(no project)"
+
+    def project_report(self, today: Optional[date] = None) -> list[dict]:
+        """Per-project breakdown of task counts.
+
+        Returns one row per project with ``pending`` / ``done`` / ``overdue`` /
+        ``total`` counts. A task that carries several ``+project`` tags is
+        counted under each of them; tasks with no project are grouped under
+        ``"(no project)"``. Rows are sorted alphabetically, with the
+        no-project bucket last.
+        """
+        today = today or date.today()
+        buckets: dict[str, dict] = {}
+
+        def bucket(name: str) -> dict:
+            return buckets.setdefault(
+                name, {"project": name, "pending": 0, "done": 0, "overdue": 0, "total": 0}
+            )
+
+        for task in self._tasks:
+            names = task.projects or [self.NO_PROJECT]
+            for name in names:
+                row = bucket(name)
+                row["total"] += 1
+                if task.completed:
+                    row["done"] += 1
+                else:
+                    row["pending"] += 1
+                    if task.is_overdue(today):
+                        row["overdue"] += 1
+
+        return sorted(
+            buckets.values(),
+            key=lambda r: (r["project"] == self.NO_PROJECT, r["project"].lower()),
+        )
+
 
 def _sorted_unique(items: Iterable[str]) -> list[str]:
     return sorted(set(items), key=str.lower)

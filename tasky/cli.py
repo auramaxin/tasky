@@ -168,6 +168,9 @@ def build_parser() -> argparse.ArgumentParser:
     # stats
     sub.add_parser("stats", help="show a summary report").set_defaults(func=cmd_stats)
 
+    # report
+    sub.add_parser("report", help="per-project breakdown of task counts").set_defaults(func=cmd_report)
+
     # archive
     sub.add_parser("archive", help="move completed tasks to the done file").set_defaults(func=cmd_archive)
 
@@ -324,6 +327,30 @@ def cmd_contexts(ctx: Context, args: argparse.Namespace) -> int:
         print("No contexts.")
     for name in contexts:
         print(ctx.paint("@" + name, "blue"))
+    return 0
+
+
+def cmd_report(ctx: Context, args: argparse.Namespace) -> int:
+    rows = ctx.tasks.project_report(ctx.today)
+    if not rows:
+        print("No tasks to report.")
+        return 0
+    paint = ctx.paint
+
+    def display(name: str) -> str:
+        return name if name == ctx.tasks.NO_PROJECT else "+" + name
+
+    name_w = max(len("project"), max(len(display(r["project"])) for r in rows))
+    header = f"{'project':<{name_w}}  {'pend':>4}  {'done':>4}  {'over':>4}  {'total':>5}"
+    print(paint(header, "bold"))
+    for r in rows:
+        over = f"{r['overdue']:>4}"
+        if r["overdue"]:
+            over = paint(over, "red")
+        print(
+            f"{display(r['project']):<{name_w}}  "
+            f"{r['pending']:>4}  {r['done']:>4}  {over}  {r['total']:>5}"
+        )
     return 0
 
 
