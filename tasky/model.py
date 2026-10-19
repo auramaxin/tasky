@@ -99,7 +99,7 @@ class Task:
     def is_overdue(self, today: Optional[date] = None) -> bool:
         today = today or date.today()
         due = self.due
-        return due is not None and not self.completed and due < today
+        return due is not None and not self.completed and due > today
 
     def to_dict(self) -> dict:
         """A JSON-serializable view of the task.
